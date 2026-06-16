@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuRaite - Mi Panel</title>
+    <link rel="stylesheet" href="../css/emergencia.css"> </head>
+<body>
+
+    <header style="background-color: #007bff; text-align: center; padding: 20px; color: white;">
+        <h1>Mi Panel de Configuración - CuRaite</h1>
+    </header>
+
+    <main style="max-width: 600px; margin: 20px auto; padding: 20px; background: #222; border-radius: 8px;">
+        <section style="text-align: center; background: #333; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px dashed #007bff;">
+    <h3> Tu Código QR para el Casco</h3>
+    <img id="contenedor-qr" src="" alt="Cargando tu QR..." style="background: white; padding: 10px; display: none; margin: 10px auto; border-radius: 5px;">
+    <br>
+    <a id="btn-descargar-qr" href="#" download="Mi_QR_CuRaite.png" style="display: none; background: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px;">Descargar QR (PNG)</a>
+</section>
+        <form id="form-panel">
+            <h2>Datos Médicos</h2>
+            <label>Tipo de Sangre:</label><br>
+            <select id="form-sangre" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+            </select>
+
+            <label>Alergias (Máx 500 caracteres):</label><br>
+            <textarea id="form-alergias" style="width: 100%; height: 60px; margin-bottom: 15px;"></textarea>
+
+            <label>Condiciones Crónicas:</label><br>
+            <textarea id="form-condiciones" style="width: 100%; height: 60px; margin-bottom: 15px;"></textarea>
+
+            <label>Medicamentos:</label><br>
+            <textarea id="form-medicamentos" style="width: 100%; height: 60px; margin-bottom: 20px;"></textarea>
+
+            <hr>
+
+            <h2>Contacto de Emergencia (Familiar)</h2>
+            <label>Nombre del Familiar:</label><br>
+            <input type="text" id="contacto-nombre" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+
+            <label>Teléfono (Ej: +525512345678):</label><br>
+            <input type="text" id="contacto-telefono" style="width: 100%; padding: 10px; margin-bottom: 20px;">
+
+            <button type="submit" style="width: 100%; padding: 15px; background: #007bff; color: white; border: none; font-size: 1.2rem; cursor: pointer; border-radius: 5px;">
+                Guardar Configuración
+            </button>
+        </form>
+    </main>
+
+    <script src="../js/panel.js"></script>
+</body>
+</html>
