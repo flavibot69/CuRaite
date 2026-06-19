@@ -30,10 +30,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 5. --- ENRUTADO PARA VISTAS (FRONTEND) ---
 // Cuando entren a la raíz, sirve el archivo HTML
-app.get('/', (req, res) => {
+/*app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'views', 'emergencia.html'));
-});
+});*/
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'views', 'index.html'));
+})
+app.get('/auth', (req, res)=> {
+    res.sendFile(path.join(__dirname, 'public', 'views', 'auth.html'));
+})
 // Ruta API para guardar los datos del panel
 app.post('/api/panel/guardar', (req, res) => userController.guardarDatos(req, res));
 
