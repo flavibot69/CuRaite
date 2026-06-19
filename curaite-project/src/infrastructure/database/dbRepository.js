@@ -96,6 +96,78 @@ class DbRepository {
             throw error;
         }
     }
+    // 6. Obtener un incidente específico para control de falsos positivos
+    async obtenerIncidentePorId(incidenteId) {
+        const query = `SELECT id, usuario_id, ubicacion_aprox, es_falso_positivo, fecha_hora FROM incidentes WHERE id = ?`;
+        try {
+            const [rows] = await this.pool.execute(query, [incidenteId]);
+            return rows[0] || null;
+        } catch (error) {
+            console.error("Error al recuperar incidente:", error);
+            throw error;
+        }
+    }
+
+    // 7. Modificar el estado del incidente en la base de datos
+    async actualizarEstadoIncidente(incidenteId, esFalsoPositivo) {
+        const query = `UPDATE incidentes SET es_falso_positivo = ? WHERE id = ?`;
+        try {
+            await this.pool.execute(query, [esFalsoPositivo ? 1 : 0, incidenteId]);
+            return true;
+        } catch (error) {
+            console.error("Error al actualizar estado del incidente:", error);
+            throw error;
+        }
+    }
+    // 8. Obtener todos los incidentes asociados a un usuario especifico
+    async obtenerIncidentesPorUsuario(usuarioId) {
+        const query = `SELECT id, ubicacion_aprox, es_falso_positivo, fecha_hora FROM incidentes WHERE usuario_id = ? ORDER BY fecha_hora DESC`;
+        try {
+            const [rows] = await this.pool.execute(query, [usuarioId]);
+            return rows.map(row => ({
+                id: row.id,
+                ubicacionAprox: row.ubicacion_aprox,
+                esFalsoPositivo: Boolean(row.es_falso_positivo),
+                fechaHora: row.fecha_hora
+            }));
+        } catch (error) {
+            console.error("Error al leer lista de incidentes:", error);
+            throw error;
+        }
+    }
+    // 9. Registrar un nuevo motociclista en la base de datos (CORREGIDO: password_hash)
+    async registrarUsuario(id, nombre, email, passwordHash) {
+        const query = `INSERT INTO usuarios (id, nombre, email, password_hash, plan_premium) VALUES (?, ?, ?, ?, 0)`;
+        try {
+            await this.pool.execute(query, [id, nombre, email, passwordHash]);
+            return true;
+        } catch (error) {
+            console.error("Error al insertar usuario:", error);
+            throw error;
+        }
+    }
+
+    // 10. Buscar un usuario por email para el inicio de sesión (CORREGIDO: password_hash)
+    async buscarPorEmail(email) {
+        const query = `SELECT id, nombre, email, password_hash FROM usuarios WHERE email = ?`;
+        try {
+            const [rows] = await this.pool.execute(query, [email]);
+            return rows[0] || null;
+        } catch (error) {
+            console.error("Error al buscar email:", error);
+            throw error;
+        }
+    }
+    async actualizarPlanUsuario(usuarioId, planPremium) {
+        const query = `UPDATE usuarios SET plan_premium = ? WHERE id = ?`;
+        try {
+            await this.pool.execute(query, [planPremium ? 1 : 0, usuarioId]);
+            return true;
+        } catch (error) {
+            console.error("Error al actualizar plan en BD:", error);
+            throw error;
+        }
+    }
 }
 
 module.exports = DbRepository;

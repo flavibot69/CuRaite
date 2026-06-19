@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuRaite - Historial de Alertas</title>
+</head>
+<body>
+
+    <header>
+        <h1>Historial de Incidentes y Alertas QR</h1>
+        <nav>
+            <a href="/panel">Ir a Mi Panel</a> | 
+            <a href="/talleres">Ver Talleres</a>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>Alertas Recientes</h2>
+            <p>Monitoreo en tiempo real de los escaneos de tu codigo QR.</p>
+            
+            <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; text-align: left;">
+                <thead>
+                    <tr>
+                        <th>Fecha y Hora</th>
+                        <th>Ubicacion Registrada</th>
+                        <th>Estado de Alerta</th>
+                        <th>Accion</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-incidentes">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script src="../js/historial.js"></script>
+</body>
+</html>

@@ -1,28 +1,42 @@
 // src/ports/inbound/actualizarPanel.js
 
+const PerfilMedico = require('../../domain/entities/perfilMedico');
+const ContactoEmergencia = require('../../domain/entities/contactoEmergencia');
+const Motociclista = require('../../domain/entities/motociclista');
+
 class ActualizarPanel {
     constructor(dbRepository) {
         this.dbRepository = dbRepository;
     }
 
-    async ejecutar(usuarioId, datosMedicos, contactos) {
-        // 1. Regla de Negocio (RF17): Validar máximo 5 contactos de emergencia
-        if (contactos && contactos.length > 5) {
-            throw new Error("El plan de CuRaite permite un máximo de 5 contactos de emergencia.");
+    async ejecutar(usuarioId, planPremium, datosMedicos, contactos) { // <-- Recibe planPremium
+    const perfilValidado = new PerfilMedico({ /* ... */ });
+    const contactosValidados = contactos.map(c => new ContactoEmergencia({ /* ... */ }));
+
+      
+        
+
+
+        // 3. Crear el motociclista en el dominio para validar el límite máximo de contactos (RF17)
+        const motociclista = new Motociclista({
+        id: usuarioId,
+        planPremium: planPremium, // <-- Pasamos el flag real
+        contactos: contactosValidados
+    });
+        if (motociclista.contactos.length > 0 && !motociclista.planPremium) {
+        throw new Error("El plan gratuito no permite almacenar contactos de emergencia.");
+    }
+
+        if (motociclista.contactos.length > 5) {
+            throw new Error("El sistema restringe el almacenamiento a un máximo de 5 contactos.");
         }
 
-        // 2. Regla de Negocio (RNF13): Validar longitud de textos médicos
-        if (datosMedicos.alergias.length > 500 || datosMedicos.condiciones.length > 500) {
-            throw new Error("Las alergias o condiciones no pueden superar los 500 caracteres.");
-        }
+        // 4. Si el dominio da luz verde, se persiste en la infraestructura
+        await this.dbRepository.actualizarPerfilMedico(usuarioId, perfilValidado);
+    await this.dbRepository.actualizarContactos(usuarioId, contactosValidados);
+    await this.dbRepository.actualizarPlanUsuario(usuarioId, motociclista.planPremium);
 
-        // 3. Ordenar a la base de datos que guarde el perfil médico
-        await this.dbRepository.actualizarPerfilMedico(usuarioId, datosMedicos);
-
-        // 4. Actualizar los contactos de emergencia (borramos los anteriores y guardamos los nuevos)
-        await this.dbRepository.actualizarContactos(usuarioId, contactos);
-
-        return { mensaje: "Panel actualizado correctamente" };
+    return { estatus: "completado" };
     }
 }
 

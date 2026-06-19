@@ -3,30 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CuRaite - Emergencia Médica</title>
-    <link rel="stylesheet" href="../css/emergencia.css">
+    <title>CuRaite - Información de Emergencia</title>
 </head>
 <body>
 
-    <header class="alerta-header">
-        <h1>INFORMACIÓN DE EMERGENCIA</h1>
+    <header>
+        <h1>Ficha Médica de Emergencia (CuRaite)</h1>
+        <p id="alerta-gps">Obteniendo ubicación del incidente para alertar a los contactos de emergencia...</p>
     </header>
 
-    <main class="contenedor-medico">
-        <section class="tarjeta-sangre">
-            <h2>Tipo de Sangre</h2>
-            <p id="tipo-sangre">Cargando...</p>
+    <main>
+        <section id="bloque-datos" style="display: none;">
+            <h2>Datos del Motociclista</h2>
+            <p><strong>Nombre:</strong> <span id="nombre-usuario">Cargando...</span></p>
+            
+            <hr>
+
+            <h2>Información Vital</h2>
+            <p><strong>Tipo de Sangre:</strong> <span id="tipo-sangre">Cargando...</span></p>
+            <p><strong>Alergias:</strong> <span id="alergias">Cargando...</span></p>
+            <p><strong>Condiciones Crónicas:</strong> <span id="condiciones">Cargando...</span></p>
+            <p><strong>Medicamentos Activos:</strong> <span id="medicamentos">Cargando...</span></p>
         </section>
 
-        <section class="detalles-medicos">
-            <h3>Alergias</h3>
-            <p id="alergias">Ninguna</p>
-
-            <h3>Condiciones Médicas</h3>
-            <p id="condiciones">Ninguna</p>
-
-            <h3>Medicamentos Actuales</h3>
-            <p id="medicamentos">Ninguno</p>
+        <section id="bloque-error" style="display: none; color: red;">
+            <h2>Error de Acceso</h2>
+            <p id="mensaje-error">No se pudo recuperar la información de este código QR.</p>
         </section>
     </main>
 

@@ -1,42 +1,74 @@
 // src/ports/inbound/escanearQR.js
 
+const Motociclista = require('../../domain/entities/motociclista');
+const PerfilMedico = require('../../domain/entities/perfilMedico');
+const ContactoEmergencia = require('../../domain/entities/contactoEmergencia');
+const MensajeSms = require('../../domain/entities/mensajeSms');
+
 class EscanearQR {
-    // Recibe los adaptadores a través del constructor (Inyección de dependencias)
     constructor(dbRepository, smsAdapter) {
         this.dbRepository = dbRepository;
         this.smsAdapter = smsAdapter;
     }
 
     async ejecutar(usuarioId, ubicacion) {
-        // 1. Buscar al motociclista en la base de datos de XAMPP
-        const motociclista = await this.dbRepository.buscarPorId(usuarioId);
+        const datosCrudos = await this.dbRepository.buscarPorId(usuarioId);
         
-        if (!motociclista) {
+        if (!datosCrudos) {
             throw new Error("El código QR no pertenece a ningún motociclista registrado.");
         }
 
-        // 2. Si el plan es Premium, se disparan las alertas por SMS (RF18, RF35)
-        if (motociclista.planPremium === true && motociclista.contactos.length > 0) {
-            const mensajeSMS = `🚨 EMERGENCIACuRaite: ${motociclista.nombre} ha tenido un incidente. Revisa su perfil médico de inmediato aquí: http://localhost:3000/views/emergencia.html?id=${motociclista.id}`;
+        // 1. Instanciar y validar el Perfil Médico mediante el Dominio
+        const perfilMedicoDominio = new PerfilMedico({
+            usuarioId: datosCrudos.id,
+            tipoSangre: datosCrudos.tipoSangre,
+            alergias: datosCrudos.alergias,
+            condiciones: datosCrudos.condiciones,
+            medicamentos: datosCrudos.medicamentos
+        });
+
+        // 2. Instanciar y validar cada Contacto de Emergencia mediante el Dominio
+        const contactosDominio = datosCrudos.contactos.map(telefono => 
+            new ContactoEmergencia({
+                usuarioId: datosCrudos.id,
+                telefono: telefono,
+                nombre: "Contacto Registrado",
+                relacion: "Familiar"
+            })
+        );
+
+        // 3. Instanciar al Motociclista vinculando sus objetos de dominio
+        const motociclista = new Motociclista({
+            id: datosCrudos.id,
+            nombre: datosCrudos.nombre,
+            planPremium: datosCrudos.planPremium,
+            perfilMedico: perfilMedicoDominio,
+            contactos: contactosDominio.map(c => c.telefono)
+        });
+
+        // 4. Evaluar el disparo de alertas con la regla de negocio del dominio
+        if (motociclista.puedeDispararAlertas()) {
+            const enlaceEmergencia = `http://localhost:3000/?id=${motociclista.id}`;
             
-            // Enviamos el SMS a cada contacto registrado (Máximo 5)
             for (const telefono of motociclista.contactos) {
-                await this.smsAdapter.enviarSMS(telefono, mensajeSMS);
+                // Instanciamos el flujo del mensaje en el dominio para controlar su estado
+                const smsDominio = new MensajeSms({
+                    contenido: `Alerta CuRaite: ${motociclista.nombre} requiere asistencia. Info medica: ${enlaceEmergencia}`
+                });
+
+                try {
+                    await this.smsAdapter.enviarSMS(telefono, smsDominio.contenido);
+                    smsDominio.registrarEnvioExitoso();
+                } catch (error) {
+                    smsDominio.registrarFallo();
+                    console.error(`Fallo en el envío de SMS al número ${telefono}`);
+                }
             }
 
-            // 3. Registrar el incidente en el historial de XAMPP (RF30)
             await this.dbRepository.guardarIncidente(usuarioId, ubicacion || "Ubicación no compartida");
         }
 
-        // 4. Retornar solo los datos médicos necesarios (Ocultando datos privados RNF18)
-        return {
-            nombre: motociclista.nombre,
-            tipoSangre: motociclista.tipoSangre,
-            alergias: motociclista.alergias,
-            condiciones: motociclista.condiciones,
-            medicamentos: motociclista.medicamentos,
-            planPremium: motociclista.planPremium
-        };
+        return motociclista.obtenerPerfilPublico();
     }
 }
 
