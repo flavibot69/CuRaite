@@ -194,7 +194,7 @@ class DbRepository {
 
     // 10. Buscar un usuario por email para el inicio de sesión (CORREGIDO: password_hash)
     async buscarPorEmail(email) {
-        const query = `SELECT id, nombre, email, password_hash FROM usuarios WHERE email = ?`;
+        const query = `SELECT id, nombre, email, password_hash, tipo_usuario FROM usuarios WHERE email = ?`;
         try {
             const [rows] = await this.pool.execute(query, [email]);
             return rows[0] || null;
@@ -217,7 +217,7 @@ class DbRepository {
 
     // 11. Obtener talleres aprobados (Soporta el filtro opcional de especialidad)
     async obtenerTalleresVerificados(especialidad = null) {
-        let query = `SELECT id, nombre_taller AS nombreTaller, ubicacion, especialidades, calificacion FROM mecanicos WHERE estado_verificacion = 'aprobado'`;
+        let query = `SELECT id, nombre_taller AS nombreTaller, ubicacion, especialidades, calificacion FROM mecanicos WHERE estado_verificacion = 'Aprobado'`;
         const params = [];
 
         if (especialidad) {
@@ -246,6 +246,127 @@ class DbRepository {
             throw error;
         }
     }
+    async obtenerMetricasGlobales(){
+        try {
+            const [usuariosRows] = await this.pool.execute("SELECT COUNT(*) AS total FROM usuarios");
+            const [usuariosPremiumRows] = await this.pool.execute("SELECT COUNT(*) AS total FROM usuarios WHERE plan_premium = 1");
+            const [mecanicosRows] = await this.pool.execute("SELECT COUNT(*) AS total FROM mecanicos");
+            const [qrsRows] = await this.pool.execute("SELECT COUNT(*) AS total FROM incidentes");
+            return {
+                totalUsuarios: usuariosRows[0]?.total || 0,
+                totalPremium: usuariosPremiumRows[0]?.total || 0,
+                totalMecanicos: mecanicosRows[0]?.total || 0,
+                totalQrs: qrsRows[0]?.total || 0
+            };
+
+        } catch(error){
+            console.error("Error al obtener metricas", error.message);
+            throw error;
+        }
+    }
+
+    async buscarUsuariosAdmin(criterio) {
+        const query = `
+            SELECT id, nombre, email, tipo_usuario AS tipo, plan_premium AS premium, estado 
+            FROM usuarios 
+            WHERE nombre LIKE ? OR email LIKE ?
+        `;
+        const parametro = `%${criterio}%`;
+        const [rows] = await this.pool.execute(query, [parametro, parametro]);
+        return rows;
+    }
+
+    async actualizarEstadoUsuario(usuarioId, nuevoEstado) {
+        const query = "UPDATE usuarios SET estado = ? WHERE id = ?";
+        await this.pool.execute(query, [nuevoEstado, usuarioId]);
+        return true;
+    }
+
+    // RF44: Listar mecánicos cuyo estado de registro esté en revisión ('Pendiente')
+   async obtenerMecanicosPendientes() {
+        try {
+            const query = `
+                SELECT 
+                    id, 
+                    nombre_taller AS nombreTaller, 
+                    ubicacion, 
+                    especialidades 
+                FROM mecanicos 
+                WHERE estado_verificacion = 'Pendiente'
+            `;
+            const [rows] = await this.pool.execute(query);
+            return rows || [];
+        } catch (error) {
+            console.error("Error en DbRepository.obtenerMecanicosPendientes:", error.message);
+            throw error;
+        }
+    }
+
+    // 2. Actualizar el estado y guardar la justificación del rechazo
+    async actualizarEstadoMecanico(mecanicoId, nuevoEstado, justificacion) {
+    try {
+        // CORREGIDO: Eliminamos 'justificacion_rechazo' de la consulta SQL
+        const query = `
+            UPDATE mecanicos 
+            SET estado_verificacion = ? 
+            WHERE id = ?
+        `;
+        
+        // Ejecutamos pasando únicamente los dos parámetros requeridos
+        await this.pool.execute(query, [nuevoEstado, mecanicoId]);
+        return true;
+    } catch (error) {
+        console.error("Error en DbRepository.actualizarEstadoMecanico:", error.message);
+        throw error;
+    }
+}
+
+    // RF45: Filtros combinados dinámicos con SQL para Logs
+    async obtenerLogsQRFiltrados(filtros) {
+    try {
+        // CORREGIDO: Ajustamos los nombres de los campos basados en tu imagen de la BD
+        let query = `
+            SELECT 
+                l.fecha_hora AS fechaHora, 
+                u.nombre AS usuario, 
+                l.ubicacion_aprox AS ubicacion, 
+                l.id AS qrId 
+            FROM incidentes l
+            JOIN usuarios u ON l.usuario_id = u.id
+            WHERE 1=1
+        `;
+        const params = [];
+
+        // Filtros dinámicos
+        if (filtros.fechaInicio) { 
+            query += " AND DATE(l.fecha_hora) >= ?"; 
+            params.push(filtros.fechaInicio); 
+        }
+        if (filtros.fechaFin) { 
+            query += " AND DATE(l.fecha_hora) <= ?"; 
+            params.push(filtros.fechaFin); 
+        }
+        if (filtros.usuario) { 
+            query += " AND (u.nombre LIKE ? OR u.email LIKE ?)"; 
+            params.push(`%${filtros.usuario}%`, `%${filtros.usuario}%`); 
+        }
+        if (filtros.ubicacion) { 
+            // CORREGIDO: Filtra sobre la columna real
+            query += " AND l.ubicacion_aprox LIKE ?"; 
+            params.push(`%${filtros.ubicacion}%`); 
+        }
+
+        query += " ORDER BY l.fecha_hora DESC";
+        
+        const [rows] = await this.pool.execute(query, params);
+        return rows || [];
+
+    } catch (error) {
+        console.error("Error en DbRepository.obtenerLogsQRFiltrados:", error.message);
+        throw error;
+    }
+}
+
 }
 
 module.exports = DbRepository;

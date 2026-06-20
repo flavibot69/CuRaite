@@ -4,6 +4,8 @@ const ActualizarPanel = require('../../ports/inbound/actualizarPanel');
 const GenerarQRUseCase = require('../../ports/inbound/generarQRUseCase');
 const ListarTalleres = require('../../ports/inbound/listarTalleres');
 const GestionarFalsoPositivo = require('../../ports/inbound/gestionarFalsoPositivo');
+const GestionarUsuariosAdmin = require('../../ports/inbound/gestionarUsuariosAdmin');
+const GestionarSolicitudesMecanicos = require('../../ports/inbound/gestionarSolicitudesMecanicos');
 const DbRepository = require('../database/dbRepository');
 const crypto = require('crypto');
 
@@ -16,6 +18,9 @@ class UserController {
         this.generarQRUseCase = new GenerarQRUseCase();
         this.listarTalleresUseCase = new ListarTalleres(dbRepository);
         this.gestionarFalsoPositivoUseCase = new GestionarFalsoPositivo(dbRepository);
+        this.gestionarUsuariosAdminUseCase = new GestionarUsuariosAdmin(dbRepository);
+        this.gestionarSolicitudesMecanicosUseCase = new GestionarSolicitudesMecanicos(dbRepository);
+        
         
         // Repositorio directo para lecturas que no requieren reglas complejas de dominio
         this.dbRepository = dbRepository;
@@ -154,7 +159,7 @@ class UserController {
             }
 
             // Si todo está bien, otorgamos acceso
-            return res.json({ usuarioId: usuario.id, nombre: usuario.nombre });
+            return res.json({ usuarioId: usuario.id, nombre: usuario.nombre, rol: usuario.tipo_usuario });
         } catch (error) {
             console.error("Error en iniciarSesionUsuario:", error.message);
             return res.status(500).json({ error: error.message });
@@ -169,6 +174,55 @@ class UserController {
             return res.status(500).json({ error: error.message });
         }
     }
+    async devolverMetricas(req, res) {
+        try {
+            
+            const metricas = await this.dbRepository.obtenerMetricasGlobales();
+            
+            
+            return res.json(metricas);
+        } catch (error) {
+            console.error("Error en UserController.devolverMetricas:", error.message);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+    async buscarUsuarios(req, res) {
+        try {
+            const { q } = req.query; // Nombre o correo electrónico
+            const usuarios = await this.gestionarUsuariosAdminUseCase.buscar(q || '');
+            return res.json(usuarios);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    async actualizarEstado(req, res) {
+        try {
+            const { usuarioId, estado } = req.body;
+            await this.gestionarUsuariosAdminUseCase.cambiarEstado(usuarioId, estado);
+            return res.json({ mensaje: `Usuario actualizado a ${estado} con éxito.` });
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+    async listarMecanicosPendientes(req, res) {
+        try {
+            const solicitudes = await this.gestionarSolicitudesMecanicosUseCase.listarPendientes();
+            return res.json(solicitudes);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+    async resolverSolicitudMecanico(req, res) {
+        try {
+            const { mecanicoId, aprobado, justificacion } = req.body;
+            await this.gestionarSolicitudesMecanicosUseCase.procesar(mecanicoId, aprobado, justificacion);
+            return res.json({ mensaje: "Solicitud procesada correctamente." });
+        } catch (error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
 }
 
 module.exports = UserController;

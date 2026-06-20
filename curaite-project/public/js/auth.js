@@ -72,6 +72,7 @@ async function login() {
             // Guardamos el ID devuelto por el servidor en el almacenamiento local
             localStorage.setItem("usuarioId", datos.usuarioId);
             localStorage.setItem("nombreUsuario", datos.nombre);
+            localStorage.setItem("rol", datos.rol);
             
             alert("Bienvenido a CuRaite, " + datos.nombre);
             window.location.href = "/panel"; // Redirección automática al panel configurado

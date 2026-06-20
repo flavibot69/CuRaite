@@ -2,12 +2,19 @@
 
 document.addEventListener("DOMContentLoaded", () => {
     const usuarioId = localStorage.getItem("usuarioId");
+    const usuarioRol = localStorage.getItem("rol");
 
     if (!usuarioId) {
         alert("Sesión no válida o expirada. Por favor, inicia sesión.");
         window.location.href = "/auth";
         return;
     }
+    if(usuarioRol == "administrador"){
+        document.getElementById("boton-admin").style.display = "block";
+    }else{
+        document.getElementById("boton-admin").style.display = "none";
+    }
+    
 
     // 1. Enlazar los elementos del DOM
     const form = document.getElementById("formulario-panel");

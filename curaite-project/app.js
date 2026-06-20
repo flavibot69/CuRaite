@@ -49,6 +49,10 @@ app.get('/talleres', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'views', 'talleres.html'));
 });
 
+app.get('/adminpanel', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'views', 'adminpanel.html'));
+});
+
 
 // 4. --- RUTAS DE LA API (BACKEND) ---
 app.post('/api/escanear', (req, res) => qrController.procesarEscaneo(req, res));
@@ -102,6 +106,18 @@ app.post('/api/incidentes/falso-positivo', async (req, res) => {
 app.get('/api/talleres', (req, res) => userController.buscarTalleres(req, res));
 app.post('/api/talleres/registrar', (req, res) => userController.registrarTaller(req, res));
 
+//api del admin
+
+app.get('/api/adminPanel/obtenerMetricas', (req, res) => userController.devolverMetricas(req, res));
+app.get('/api/adminPanel/usuarios', (req, res) => userController.buscarUsuarios(req, res));
+app.put('/api/adminPanel/usuarios/estado', (req, res) => userController.actualizarEstado(req, res));
+
+// RF44
+app.get('/api/adminPanel/mecanicos/pendientes', (req, res) => userController.listarMecanicosPendientes(req, res));
+app.put('/api/adminPanel/mecanicos/resolver', (req, res) => userController.resolverSolicitudMecanico(req, res));
+
+// RF45
+app.get('/api/adminPanel/logs-qr', (req, res) => qrController.filtrarLogs(req, res));
 
 // 5. --- ARCHIVOS ESTÁTICOS (AL FINAL) ---
 app.use(express.static(path.join(__dirname, 'public')));

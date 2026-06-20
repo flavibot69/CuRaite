@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuRaite - Panel de Administración</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+<header>
+    <h1>Panel de Administración - CuRaite</h1>
+    <p>Gestión de usuarios, mecánicos y monitoreo del sistema</p>
+
+
+<nav>
+    <a href="/panel">Dashboard Principal</a>
+    <a href="/">Cerrar Sesión</a>
+</nav>
+
+
+</header>
+
+<main class="container">
+
+
+<!-- RF42 -->
+<section>
+    <h2>Métricas Generales</h2>
+
+    <p><strong>Total de Usuarios:</strong> <span id="totalUsuarios">0</span></p>
+
+    <p><strong>Usuarios Premium:</strong> <span id="usuariosPremium">0</span></p>
+
+    <p><strong>Mecánicos Registrados:</strong> <span id="totalMecanicos">0</span></p>
+
+    <p><strong>QR Escaneados:</strong> <span id="totalQR">0</span></p>
+
+</section>
+
+<!-- RF43 -->
+<section>
+    <h2>Gestión de Usuarios</h2>
+
+    <label for="buscarUsuario">Buscar usuario</label>
+
+    <input
+        type="text"
+        id="buscarUsuario"
+        placeholder="Nombre o correo electrónico"
+    >
+
+    <button type="button">
+        Buscar
+    </button>
+
+    <br><br>
+
+    <table width="100%" border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Tipo</th>
+                <th>Premium</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaUsuarios">
+            <tr>
+                <td>Juan Pérez</td>
+                <td>juan@email.com</td>
+                <td>Motociclista</td>
+                <td>Sí</td>
+                <td>Activo</td>
+                <td>
+                    <button type="button">Suspender</button>
+                    <p></p>
+                    <button type="button">Activar</button>
+                    <p></p>
+                    <button type="button" class="btn-danger">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<!-- RF44 -->
+<section>
+    <h2>Solicitudes de Mecánicos Pendientes</h2>
+
+    <table width="100%" border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Taller</th>
+                <th>Ubicación</th>
+                <th>Especialidades</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaSolicitudes">
+            <tr>
+                <td>Taller El Rápido</td>
+                <td>Zapopan, Jalisco</td>
+                <td>Motor, Eléctrico</td>
+                <td>
+                    <button type="button">Aprobar</button>
+                    <p></p>
+                    <button type="button" class="btn-danger">
+                        Rechazar
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br>
+
+    
+</section>
+
+<!-- RF45 -->
+<section>
+    <h2>Log de Escaneos QR</h2>
+
+    <label for="fechaInicio">Fecha Inicio</label>
+    <input type="date" id="fechaInicio">
+
+    <label for="fechaFin">Fecha Fin</label>
+    <input type="date" id="fechaFin">
+
+    <label for="usuarioFiltro">Usuario</label>
+    <input
+        type="text"
+        id="usuarioFiltro"
+        placeholder="Nombre o correo"
+    >
+
+    <label for="ubicacionFiltro">Ubicación</label>
+    <input
+        type="text"
+        id="ubicacionFiltro"
+        placeholder="Ciudad o coordenadas"
+    >
+
+    <button type="button">
+        Filtrar Registros
+    </button>
+
+    <br><br>
+
+    <table width="100%" border="1" cellpadding="10">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Usuario</th>
+                <th>Ubicación</th>
+                <th>ID QR</th>
+            </tr>
+        </thead>
+
+        <tbody id="tablaLogs">
+            <tr>
+                <td>20/06/2026 10:30</td>
+                <td>Juan Pérez</td>
+                <td>Guadalajara, Jalisco</td>
+                <td>QR-001</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+
+</main>
+<script src="../js/adminpanel.js"></script>
+</body>
+</html>
