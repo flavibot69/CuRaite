@@ -1,29 +1,87 @@
-<form id="formulario-panel">
-    <fieldset style="margin-bottom: 15px; padding: 10px;">
-    <legend><strong>Tipo de Cuenta (Simulación Freemium)</strong></legend>
-    <label>
-        <input type="radio" name="planPremium" value="false" id="plan-freemium" checked onchange="evaluarRestriccionesPlan()">
-        Plan Gratuito (Básico)
-    </label>
-    <br>
-    <label>
-        <input type="radio" name="planPremium" value="true" id="plan-premium" onchange="evaluarRestriccionesPlan()">
-        Plan Premium 🌟 (Alertas SMS activas)
-    </label>
-</fieldset>
-    <select id="input-sangre">
-        <option value="O+">O Positivo (O+)</option>
-        <option value="A+">A Positivo (A+)</option>
-        </select>
-    <textarea id="input-alergias" placeholder="Alergias..."></textarea>
-    <textarea id="input-condiciones" placeholder="Condiciones médicas..."></textarea>
-    <textarea id="input-medicamentos" placeholder="Medicamentos actuales..."></textarea>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuRaite - Mi Panel de Seguridad</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
 
-    <input type="text" id="contacto1-nombre" placeholder="Nombre Familiar">
-    <input type="text" id="contacto1-telefono" placeholder="+521234567890">
-    <input type="text" id="contacto1-relacion" placeholder="Esposa, Madre, etc.">
+    <header>
+        <h1>Panel de Configuración Médica</h1>
+        <p>Gestiona tu perfil de protección y el estado de tu suscripción</p>
+        <nav>
+            <a href="/panel" class="active">Inicio</a> | 
+            <a href="/historial">Mi Historial de Incidentes</a> | 
+            <a href="/talleres">Directorio de Mecánicos</a> |
+            <a href="#" id="btn-cerrar-sesion">Cerrar Sesión</a>
+        </nav>
+    </header>
 
-    <button type="submit">Guardar Configuración</button>
-</form>
+    <main class="container">
+        <section>
+            <h2>Configuración del Perfil</h2>
+            
+            <form id="formulario-panel">
+                
+                <fieldset>
+                    <legend>Tipo de Suscripción</legend>
+                    <label>
+                        <input type="radio" name="planPremium" value="false" id="plan-freemium" checked>
+                        Plan Gratuito (Básico)
+                    </label>
+                    <br>
+                    <label>
+                        <input type="radio" name="planPremium" value="true" id="plan-premium">
+                        Plan Premium (Habilita Alertas SMS)
+                    </label>
+                </fieldset>
 
-<div id="contenedor-qr">Cargando código QR único...</div>
+                <label for="input-sangre">Tipo de Sangre *</label>
+                <select id="input-sangre" required>
+                    <option value="">Selecciona tu tipo de sangre</option>
+                    <option value="O+">O Positivo (O+)</option>
+                    <option value="O-">O Negativo (O-)</option>
+                    <option value="A+">A Positivo (A+)</option>
+                    <option value="A-">A Negativo (A-)</option>
+                    <option value="B+">B Positivo (B+)</option>
+                    <option value="AB+">AB Positivo (AB+)</option>
+                </select>
+
+                <label for="input-alergias">Alergias médicas</label>
+                <textarea id="input-alergias" placeholder="Ej. Penicilina, sulfas, ninguna..."></textarea>
+
+                <label for="input-condiciones">Condiciones crónicas / padecimientos</label>
+                <textarea id="input-condiciones" placeholder="Ej. Diabetes, hipertensión, asma..."></textarea>
+
+                <label for="input-medicamentos">Medicamentos actuales</label>
+                <textarea id="input-medicamentos" placeholder="Ej. Insulina 10UI, Losartán 50mg..."></textarea>
+
+                <fieldset id="seccion-contactos">
+                    <legend>Contacto de Emergencia (Solo Premium)</legend>
+                    
+                    <label for="contacto1-nombre">Nombre Completo del Familiar</label>
+                    <input type="text" id="contacto1-nombre" placeholder="Ej. María González" disabled>
+
+                    <label for="contacto1-telefono">Teléfono Celular (10 dígitos)</label>
+                    <input type="text" id="contacto1-telefono" placeholder="Ej. 5512345678" pattern="[0-9]{10}" inputmode="numeric" disabled>
+
+                    <label for="contacto1-relacion">Parentesco / Relación</label>
+                    <input type="text" id="contacto1-relacion" placeholder="Ej. Esposa, Madre, Padre" disabled>
+                </fieldset>
+
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Tu Código QR Identificador</h2>
+            <div id="contenedor-qr">Cargando código dinámico...</div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="../js/panel.js"></script>
+</body>
+</html>

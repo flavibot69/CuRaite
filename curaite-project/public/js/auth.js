@@ -7,41 +7,43 @@ async function register() {
     const inputEmail = document.getElementById("registerEmail");
     const inputPassword = document.getElementById("registerPassword");
 
-    if (inputName.value == "" || inputFirstName.value == "" || inputEmail.value == "" || inputLastName.value == "" || inputPassword.value == "") {
+    if (inputName.value === "" || inputFirstName.value === "" || inputEmail.value === "" || inputLastName.value === "" || inputPassword.value === "") {
         alert("Llena todos los campos");
-        return;
-    } 
-    
-    if (!validarContraseña(inputPassword.value)) {
-        alert("La contraseña debe contener minimo 8 caracteres, al menos 1 mayúscula, un número y un carácter especial");
         return;
     }
 
-    const datosRegistro = {
-        nombre: `${inputName.value} ${inputFirstName.value} ${inputLastName.value}`,
-        email: inputEmail.value,
-        password: inputPassword.value
-    };
+    if (!validarContraseña(inputPassword.value)) {
+        alert("La contraseña debe contener mínimo 8 caracteres, al menos 1 mayúscula, un número y un carácter especial");
+        return;
+    }
+
+    // Concatenamos el nombre completo para el backend
+    const nombreCompleto = `${inputName.value} ${inputFirstName.value} ${inputLastName.value}`.trim();
 
     try {
         const respuesta = await fetch('/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosRegistro)
+            body: JSON.stringify({
+                nombre: nombreCompleto,
+                email: inputEmail.value.trim(),
+                password: inputPassword.value
+            })
         });
 
-        const resultado = await respuesta.json();
+        const datos = await respuesta.json();
 
         if (respuesta.status === 201) {
-            alert("Registro completado con éxito. Ya puedes iniciar sesión.");
-            // Limpiar formulario
-            inputName.value = ""; inputFirstName.value = ""; inputLastName.value = ""; inputEmail.value = ""; inputPassword.value = "";
+            alert("Registro exitoso. Ahora puedes iniciar sesión.");
+            // Limpiar formulario de registro
+            inputName.value = ""; inputFirstName.value = ""; inputLastName.value = "";
+            inputEmail.value = ""; inputPassword.value = "";
         } else {
-            alert(`Error en el registro: ${resultado.error}`);
+            alert("Error al registrar: " + datos.error);
         }
     } catch (error) {
-        console.error("Error al conectar con la API de registro:", error);
-        alert("Error de conexión con el servidor.");
+        console.error("Error de red en registro:", error);
+        alert("No se pudo conectar con el servidor.");
     }
 }
 
@@ -49,8 +51,8 @@ async function login() {
     const inputEmail = document.getElementById("loginEmail");
     const inputPassword = document.getElementById("loginPassword");
 
-    if (inputEmail.value == "" || inputPassword.value == "") {
-        alert("Por favor llena ambos campos para entrar.");
+    if (inputEmail.value === "" || inputPassword.value === "") {
+        alert("Introduce tu correo y contraseña.");
         return;
     }
 
@@ -58,23 +60,27 @@ async function login() {
         const respuesta = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: inputEmail.value, password: inputPassword.value })
+            body: JSON.stringify({
+                email: inputEmail.value.trim(),
+                password: inputPassword.value
+            })
         });
 
-        const resultado = await respuesta.json();
+        const datos = await respuesta.json();
 
         if (respuesta.status === 200) {
-            // Guardamos temporalmente el ID devuelto por la base de datos para usarlo en el panel
-            localStorage.setItem("usuarioId", resultado.usuarioId);
-            alert(`Bienvenido de nuevo, ${resultado.nombre}`);
-            // Redirigir de forma funcional al panel de usuario
-            window.location.href = "/panel";
+            // Guardamos el ID devuelto por el servidor en el almacenamiento local
+            localStorage.setItem("usuarioId", datos.usuarioId);
+            localStorage.setItem("nombreUsuario", datos.nombre);
+            
+            alert("Bienvenido a CuRaite, " + datos.nombre);
+            window.location.href = "/panel"; // Redirección automática al panel configurado
         } else {
-            alert(`Error de acceso: ${resultado.error}`);
+            alert("Error de acceso: " + datos.error);
         }
     } catch (error) {
-        console.error("Error al conectar con la API de login:", error);
-        alert("Error de conexión con el servidor.");
+        console.error("Error de red en login:", error);
+        alert("No se pudo conectar con el servidor.");
     }
 }
 

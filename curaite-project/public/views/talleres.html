@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuRaite - Talleres y Auxilio Mecánico</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <header>
+        <h1>Red de Auxilio Mecánico Certificado</h1>
+        <nav>
+            <a href="/panel">Volver al Dashboard Principal</a> 
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <h2>Buscar Mecánico Cercano</h2>
+            <label for="select-especialidad">Filtrar por Especialidad:</label>
+            <select id="select-especialidad" onchange="cargarTalleres()">
+                <option value="">Todos los talleres</option>
+                <option value="Motor">Motor / Transmisión</option>
+                <option value="Eléctrico">Sistema Eléctrico</option>
+                <option value="Llantas">Llantas / Suspensión</option>
+            </select>
+
+            <div id="lista-talleres" style="margin-top: 20px;">
+                </div>
+        </section>
+
+        <hr>
+
+        <section>
+            <h2>¿Eres mecánico? Regístrate en la Red</h2>
+            <form id="form-mecanico" onsubmit="registrarMecanico(event)">
+                <input type="text" id="mec-nombre" placeholder="Nombre del Taller / Mecánico" required><br><br>
+                <input type="text" id="mec-ubicacion" placeholder="Dirección o Municipio (Ej. Centro, CDMX)" required><br><br>
+                <input type="text" id="mec-especialidades" placeholder="Especialidades (Ej: Motor, Eléctrico, Llantas)" required><br>
+                <small>Separa las especialidades por comas</small><br><br>
+                
+                <button type="submit">Enviar Solicitud de Registro</button>
+            </form>
+        </section>
+    </main>
+
+    <script src="../js/talleres.js"></script>
+</body>
+</html>

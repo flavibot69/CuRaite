@@ -60,23 +60,48 @@ class DbRepository {
             throw error;
         }
     }
-    // 3. Método para actualizar el perfil médico
-    async actualizarPerfilMedico(usuarioId, datos) {
-        const query = `
+
+    // 3. Método para actualizar el perfil médico en la tabla independiente 'perfiles_medicos'
+    async actualizarPerfilMedico(usuarioId, perfilMedico, planPremium) {
+        const valorPlan = planPremium ? 1 : 0;
+
+        // 1. Actualizar el plan del usuario en la tabla usuarios
+        const queryUsuario = `UPDATE usuarios SET plan_premium = ? WHERE id = ?`;
+        
+        // 2. Insertar o actualizar la ficha médica en perfiles_medicos usando ON DUPLICATE KEY UPDATE
+        const queryPerfil = `
             INSERT INTO perfiles_medicos (usuario_id, tipo_sangre, alergias, condiciones_medicas, medicamentos, version)
             VALUES (?, ?, ?, ?, ?, 1)
             ON DUPLICATE KEY UPDATE 
-                tipo_sangre = VALUES(tipo_sangre), 
-                alergias = VALUES(alergias), 
-                condiciones_medicas = VALUES(condiciones_medicas), 
+                tipo_sangre = VALUES(tipo_sangre),
+                alergias = VALUES(alergias),
+                condiciones_medicas = VALUES(condiciones_medicas),
                 medicamentos = VALUES(medicamentos),
-                version = version + 1; -- Cumple RNF27 (Historial de versiones)
+                version = version + 1
         `;
+
+        const connection = await this.pool.getConnection();
         try {
-            await this.pool.execute(query, [usuarioId, datos.tipoSangre, datos.alergias, datos.condiciones, datos.medicamentos]);
+            await connection.beginTransaction();
+
+            // Ejecutar ambas consultas bajo una misma transacción por seguridad
+            await connection.execute(queryUsuario, [valorPlan, usuarioId]);
+            await connection.execute(queryPerfil, [
+                usuarioId,
+                perfilMedico.tipoSangre,
+                perfilMedico.alergias,
+                perfilMedico.condiciones,
+                perfilMedico.medicamentos
+            ]);
+
+            await connection.commit();
+            return true;
         } catch (error) {
-            console.error("Error al actualizar perfil médico:", error);
+            await connection.rollback();
+            console.error("Error en la transacción de guardar perfil:", error);
             throw error;
+        } finally {
+            connection.release();
         }
     }
 
@@ -96,6 +121,24 @@ class DbRepository {
             throw error;
         }
     }
+
+    // 5. Método indispensable para recuperar los datos médicos guardados y rellenar 'panel.js'
+    async obtenerPerfilPorUsuarioId(usuarioId) {
+        const query = `
+            SELECT p.tipo_sangre, p.alergias, p.condiciones_medicas, p.medicamentos, u.plan_premium
+            FROM perfiles_medicos p
+            INNER JOIN usuarios u ON p.usuario_id = u.id
+            WHERE p.usuario_id = ?
+        `;
+        try {
+            const [rows] = await this.pool.execute(query, [usuarioId]);
+            return rows[0] || null;
+        } catch (error) {
+            console.error("Error en obtenerPerfilPorUsuarioId:", error);
+            throw error;
+        }
+    }
+
     // 6. Obtener un incidente específico para control de falsos positivos
     async obtenerIncidentePorId(incidenteId) {
         const query = `SELECT id, usuario_id, ubicacion_aprox, es_falso_positivo, fecha_hora FROM incidentes WHERE id = ?`;
@@ -119,6 +162,7 @@ class DbRepository {
             throw error;
         }
     }
+
     // 8. Obtener todos los incidentes asociados a un usuario especifico
     async obtenerIncidentesPorUsuario(usuarioId) {
         const query = `SELECT id, ubicacion_aprox, es_falso_positivo, fecha_hora FROM incidentes WHERE usuario_id = ? ORDER BY fecha_hora DESC`;
@@ -135,6 +179,7 @@ class DbRepository {
             throw error;
         }
     }
+
     // 9. Registrar un nuevo motociclista en la base de datos (CORREGIDO: password_hash)
     async registrarUsuario(id, nombre, email, passwordHash) {
         const query = `INSERT INTO usuarios (id, nombre, email, password_hash, plan_premium) VALUES (?, ?, ?, ?, 0)`;
@@ -158,6 +203,7 @@ class DbRepository {
             throw error;
         }
     }
+
     async actualizarPlanUsuario(usuarioId, planPremium) {
         const query = `UPDATE usuarios SET plan_premium = ? WHERE id = ?`;
         try {
@@ -165,6 +211,38 @@ class DbRepository {
             return true;
         } catch (error) {
             console.error("Error al actualizar plan en BD:", error);
+            throw error;
+        }
+    }
+
+    // 11. Obtener talleres aprobados (Soporta el filtro opcional de especialidad)
+    async obtenerTalleresVerificados(especialidad = null) {
+        let query = `SELECT id, nombre_taller AS nombreTaller, ubicacion, especialidades, calificacion FROM mecanicos WHERE estado_verificacion = 'aprobado'`;
+        const params = [];
+
+        if (especialidad) {
+            query += ` AND especialidades LIKE ?`;
+            params.push(`%${especialidad}%`);
+        }
+
+        try {
+            const [rows] = await this.pool.execute(query, params);
+            return rows;
+        } catch (error) {
+            console.error("Error al obtener mecánicos:", error);
+            throw error;
+        }
+    }
+
+    // 12. Insertar una nueva solicitud de mecánico (Inicia como 'pendiente')
+    async registrarMecanico(nombreTaller, ubicacion, especialidades) {
+        const query = `INSERT INTO mecanicos (id, nombre_taller, ubicacion, especialidades, calificacion, estado_verificacion) VALUES (?, ?, ?, ?, 5.0, 'aprobado')`;
+        try {
+            const id = require('crypto').randomUUID();
+            await this.pool.execute(query, [id, nombreTaller, ubicacion, especialidades]);
+            return true;
+        } catch (error) {
+            console.error("Error al insertar mecánico:", error);
             throw error;
         }
     }

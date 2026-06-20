@@ -25,14 +25,20 @@ class UserController {
         try {
             const { usuarioId, planPremium, datosMedicos, contactos } = req.body;
 
-            if (!usuarioId || !datosMedicos || !contactos) {
-                return res.status(400).json({ error: "Estructura de peticion incompleta." });
+            if (!usuarioId) {
+                return res.status(400).json({ error: "ID de usuario ausente." });
             }
 
-            const resultado = await this.actualizarPanelUseCase.ejecutar(usuarioId, planPremium, datosMedicos, contactos);
+            const resultado = await this.actualizarPanelUseCase.ejecutar(
+                usuarioId, 
+                planPremium, 
+                datosMedicos, 
+                contactos
+            );
+            
             return res.json(resultado);
         } catch (error) {
-            console.error("Error en UserController.guardarDatos:", error.message);
+            console.error("Error en guardarDatos:", error.message);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -41,14 +47,17 @@ class UserController {
         try {
             const { usuarioId } = req.query;
 
-            if (!usuarioId) {
-                return res.status(400).json({ error: "El ID del usuario es requerido." });
+            if (!usuarioId || usuarioId === "undefined") {
+                return res.status(400).json({ error: "ID de usuario inválido." });
             }
 
-            const qrData = await this.generarQRUseCase.ejecutar(usuarioId);
-            return res.json(qrData);
+            // Redirige a la raíz con la query '?id=' para que app.js lo mande a emergencia.html de forma estricta
+            const urlEmergencia = `http://${req.get('host')}/?id=${usuarioId}`;
+            const qrCodeUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(urlEmergencia)}&choe=UTF-8`;
+
+            return res.json({ qrCodeUrl });
         } catch (error) {
-            console.error("Error en UserController.obtenerQR:", error.message);
+            console.error("Error en obtenerQR:", error.message);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -85,14 +94,23 @@ class UserController {
     async listarHistorialUsuario(req, res) {
         try {
             const { usuarioId } = req.query;
-            if (!usuarioId) {
-                return res.status(400).json({ error: "ID de usuario requerido." });
+
+            if (!usuarioId || usuarioId === "undefined") {
+                return res.status(400).json({ error: "ID de usuario ausente." });
             }
 
-            const incidentes = await this.dbRepository.obtenerIncidentesPorUsuario(usuarioId);
-            return res.json(incidentes);
+            // Llamamos al método del repositorio que creamos para traer la ficha médica real
+            const perfil = await this.dbRepository.obtenerPerfilPorUsuarioId(usuarioId);
+
+            if (!perfil) {
+                // Si es un usuario nuevo sin datos, regresamos un objeto vacío
+                return res.json({});
+            }
+
+            // Retornamos el perfil médico completo para que panel.js rellene los inputs
+            return res.json(perfil);
         } catch (error) {
-            console.error("Error en UserController.listarHistorialUsuario:", error.message);
+            console.error("Error en el controlador al obtener perfil:", error.message);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -139,6 +157,15 @@ class UserController {
             return res.json({ usuarioId: usuario.id, nombre: usuario.nombre });
         } catch (error) {
             console.error("Error en iniciarSesionUsuario:", error.message);
+            return res.status(500).json({ error: error.message });
+        }
+    }
+    async registrarTaller(req, res) {
+        try {
+            const { nombreTaller, ubicacion, especialidades } = req.body;
+            await this.dbRepository.registrarMecanico(nombreTaller, ubicacion, especialidades);
+            return res.status(201).json({ mensaje: "Taller registrado." });
+        } catch (error) {
             return res.status(500).json({ error: error.message });
         }
     }

@@ -1,146 +1,73 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CuRaite - LandingPage</title>
+    <title>CuRaite - Seguridad Inteligente para Motociclistas</title>
+    <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
 
-    <!-- HERO -->
-    <section id="hero">
-        <div class="container">
-            <h1>Tu información puede salvar tu vida</h1>
-            <h2>Seguridad inteligente para motociclistas</h2>
+    <header>
+        <h1 id="app-name">CuRaite</h1>
+        <p>Sistema de Protección y Auxilio Vial</p>
+        <nav>
+            <a href="/auth">Iniciar Sesión</a> | 
+            <a href="/talleres">Red de Talleres</a>
+        </nav>
+    </header>
 
+    <main class="container">
+        <section id="hero">
+            <h2>Tu información puede salvar tu vida</h2>
             <p>
                 En una emergencia, cada segundo cuenta. Nuestra plataforma permite
                 que cualquier persona pueda acceder de forma rápida y segura a tu
                 información médica esencial y a tus contactos de emergencia mediante
                 un código QR único colocado en tu casco.
             </p>
-
             <p>
                 Cuando alguien escanea tu código QR, podrá consultar datos importantes
                 como alergias, tipo de sangre, condiciones médicas relevantes y
                 contactos de emergencia, facilitando una atención más rápida y efectiva.
             </p>
+            <a href="/auth" class="btn-primary">Registrarme ahora</a>
+        </section>
 
-            <a href="./auth" class="btn-primary">
-                Registrarme ahora
-            </a>
-            
-            
-        </div>
-    </section>
-
-    <!-- COMO FUNCIONA -->
-    <section id="como-funciona">
-        <div class="container">
+        <section id="como-funciona">
             <h2>¿Cómo funciona?</h2>
+            <p><strong>1. Regístrate:</strong> Crea tu cuenta y añade tus datos médicos críticos.</p>
+            <p><strong>2. Coloca tu QR:</strong> Genera tu código de identificación único para tu equipo.</p>
+            <p><strong>3. Viaja seguro:</strong> En caso de incidente, los equipos de emergencia sabrán cómo ayudarte.</p>
+        </section>
 
-            <div class="steps">
-                <div class="step">
-                    <h3>1. Regístrate</h3>
-                    <p>
-                        Crea tu cuenta y completa tu perfil con información médica
-                        básica y contactos de emergencia.
-                    </p>
-                </div>
-
-                <div class="step">
-                    <h3>2. Obtén tu código QR</h3>
-                    <p>
-                        Generamos un código QR único asociado a tu perfil para que
-                        puedas colocarlo en tu casco o equipo de protección.
-                    </p>
-                </div>
-
-                <div class="step">
-                    <h3>3. Protección cuando más la necesitas</h3>
-                    <p>
-                        En caso de accidente o emergencia, cualquier persona podrá
-                        escanear el código y acceder inmediatamente a la información
-                        autorizada para ayudarte.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- BENEFICIOS -->
-    <section id="beneficios">
-        <div class="container">
-            <h2>Beneficios principales</h2>
-
-            <ul>
-                <li>Acceso inmediato a información médica relevante.</li>
-                <li>Contactos de emergencia disponibles al instante.</li>
-                <li>Mayor rapidez en la atención durante situaciones críticas.</li>
-                <li>Sin aplicaciones adicionales, funciona desde cualquier celular con cámara.</li>
-                <li>Historial de incidentes y eventos importantes.</li>
-                <li>Directorio de mecánicos y talleres verificados.</li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- PREMIUM -->
-    <section id="premium">
-        <div class="container">
-            <h2>Servicio Premium</h2>
-
-            <p>
-                Lleva tu seguridad al siguiente nivel con funciones exclusivas:
-            </p>
-
-            <ul>
-                <li>Envío automático de mensajes SOS vía SMS.</li>
-                <li>Alertas inmediatas a contactos de emergencia.</li>
-                <li>Mayor protección durante situaciones críticas.</li>
-                <li>Gestión avanzada de incidentes.</li>
-            </ul>
-        </div>
-    </section>
-
-    <!-- MECANICOS -->
-    <section id="mecanicos">
-        <div class="container">
+        <section id="mecanicos">
             <h2>¿Tu motocicleta te dejó varado?</h2>
-
             <p>
                 Encuentra mecánicos y talleres certificados cercanos para ayudarte
                 de manera rápida y confiable cuando más lo necesites.
             </p>
-
             <p>
                 Si eres mecánico, también puedes registrarte en la plataforma y
-                ofrecer tus servicios a la comunidad motociclista.
+                ofrecer tus servicios a la comunidad motociclista mexicana.
             </p>
-        </div>
-    </section>
+            <div style="margin-top: 20px;">
+                <a href="/talleres" class="btn-primary">Ver Directorio / Registrar mi Taller</a>
+            </div>
+        </section>
 
-    <!-- MISION -->
-    <section id="mision">
-        <div class="container">
+        <section id="mision">
             <h2>Diseñado para la comunidad motociclista mexicana</h2>
-
             <p>
                 Nuestra misión es ayudar a reducir los tiempos de respuesta ante
                 emergencias y brindar una herramienta tecnológica accesible que
                 aporte tranquilidad tanto a los motociclistas como a sus familias.
             </p>
-
-            <blockquote>
-                <h3>Tu casco protege tu cabeza.</h3>
-                <h3>Nuestro QR protege tu información cuando más importa.</h3>
+            <blockquote style="font-style: italic; color: var(--color-texto-secundario); padding-left: 15px; border-left: 4px solid var(--color-borde); margin: 20px 0;">
+                Tu casco protege tu cabeza. Nuestro QR protege tu información cuando más importa.
             </blockquote>
-
-            <a href="./auth" class="btn-primary">
-                Regístrate hoy y viaja con mayor seguridad
-            </a>
-        </div>
-    </section>
+        </section>
+    </main>
 
 </body>
 </html>

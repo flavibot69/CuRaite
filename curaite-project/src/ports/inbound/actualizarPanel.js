@@ -1,42 +1,49 @@
 // src/ports/inbound/actualizarPanel.js
 
+const Motociclista = require('../../domain/entities/motociclista');
 const PerfilMedico = require('../../domain/entities/perfilMedico');
 const ContactoEmergencia = require('../../domain/entities/contactoEmergencia');
-const Motociclista = require('../../domain/entities/motociclista');
 
 class ActualizarPanel {
     constructor(dbRepository) {
         this.dbRepository = dbRepository;
     }
 
-    async ejecutar(usuarioId, planPremium, datosMedicos, contactos) { // <-- Recibe planPremium
-    const perfilValidado = new PerfilMedico({ /* ... */ });
-    const contactosValidados = contactos.map(c => new ContactoEmergencia({ /* ... */ }));
+    async ejecutar(usuarioId, planPremium, datosMedicos, contactos) {
+        // 1. Validar las entidades de dominio
+        const perfilValidado = new PerfilMedico({
+            tipoSangre: datosMedicos.tipoSangre,
+            alergias: datosMedicos.alergias,
+            condiciones: datosMedicos.condiciones,
+            medicamentos: datosMedicos.medicamentos
+        });
 
-      
-        
+        const contactosValidados = contactos.map(c => new ContactoEmergencia({
+            nombre: c.nombre,
+            telefono: c.telefono,
+            relacion: c.relacion
+        }));
 
-
-        // 3. Crear el motociclista en el dominio para validar el límite máximo de contactos (RF17)
         const motociclista = new Motociclista({
-        id: usuarioId,
-        planPremium: planPremium, // <-- Pasamos el flag real
-        contactos: contactosValidados
-    });
-        if (motociclista.contactos.length > 0 && !motociclista.planPremium) {
-        throw new Error("El plan gratuito no permite almacenar contactos de emergencia.");
-    }
+            id: usuarioId,
+            planPremium: planPremium,
+            contactos: contactosValidados
+        });
 
-        if (motociclista.contactos.length > 5) {
-            throw new Error("El sistema restringe el almacenamiento a un máximo de 5 contactos.");
+        // 2. Aplicar regla de negocio estricta
+        if (motociclista.contactos.length > 0 && !motociclista.planPremium) {
+            throw new Error("El plan gratuito no permite registrar contactos de emergencia.");
         }
 
-        // 4. Si el dominio da luz verde, se persiste en la infraestructura
-        await this.dbRepository.actualizarPerfilMedico(usuarioId, perfilValidado);
-    await this.dbRepository.actualizarContactos(usuarioId, contactosValidados);
-    await this.dbRepository.actualizarPlanUsuario(usuarioId, motociclista.planPremium);
+        // 3. Guardar todo en la infraestructura de la base de datos
+        // Pasamos el perfil y el plan juntos al repositorio
+        await this.dbRepository.actualizarPerfilMedico(usuarioId, perfilValidado, motociclista.planPremium);
+        
+        if (motociclista.planPremium) {
+            await this.dbRepository.actualizarContactos(usuarioId, contactosValidados);
+        }
 
-    return { estatus: "completado" };
+        return { estatus: "completado" };
     }
 }
 
